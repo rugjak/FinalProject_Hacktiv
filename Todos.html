@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <style>
+        /* Style for the body */
+        body {
+            background-color: #f3f3f3;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Style for the todo list container */
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style for individual todo items */
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #fff;
+        }
+
+        .card-title {
+            font-weight: bold;
+        }
+
+        /* Style for the form */
+        form {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Style for the submit button when hovered */
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body onload="listTodo()">
+    <div>
+        <link rel="stylesheet" href="styles.css">
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="portfolio.html">Portfolio</a></li> <!-- Link to portfolio.html -->
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="about.html">About us</a></li>
+                <li><a href="contact.html">Contact us</a></li>
+                <li><a href="todos.html">Todos</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="container">
+        <h1>Todo List</h1>
+        <form onsubmit="onSubmit(event);return false">
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input type="text" name="title" class="form-control" placeholder="Title" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Deadline</label>
+                <input type="datetime-local" name="deadline" class="form-control" />
+            </div>
+            <input type="hidden" name="type" value="add" />
+            <input type="hidden" name="index" value="" />
+            <button type="submit" class="btn-primary">Submit</button>
+        </form>
+        <div id="todoList"></div>
+    </div>
+    <script>
+        const todoList = document.getElementById("todoList");
+
+        const todos = localStorage.getItem("todos")
+            ? JSON.parse(localStorage.getItem("todos"))
+            : [];
+
+        function listTodo() {
+            todoList.innerHTML = "";
+            todos.forEach((todo, index) => {
+                todoList.innerHTML += `
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">${todo.title}</h5>
+                
+                <button class="btn btn-primary" onclick="onUpdate(${index})">Update</button>
+                <button class="btn btn-danger" onclick="deleteTodo(${index})">Delete</button>
+              </div>
+            </div>
+          `;
+            });
+        }
+
+        function addTodo() {
+            const title = document.querySelector("input[name=title]");
+            const deadline = document.querySelector("input[name=deadline]");
+
+            if (!title.value) {
+                return alert("Please fill in the title.");
+            }
+
+            const task = {
+                title: title.value,
+                deadline: deadline.value,
+            };
+
+            todos.push(task);
+
+            // Save the updated task list to local storage, including deadlines
+            localStorage.setItem("todos", JSON.stringify(todos));
+
+            listTodo();
+        }
+
+
+
+
+
+
+        function onSubmit(event) {
+            event.preventDefault();
+            console.log(event);
+
+            const title = document.querySelector("input[name=title]");
+            let index = document.querySelector("input[name=index]");
+            const type = document.querySelector("input[name=type]");
+
+            if (!title.value != "") {
+                return alert("Please fill all the form");
+            }
+
+            if (type.value == "update") {
+                updateTodo(index.value);
+            } else {
+                addTodo();
+            }
+            type.value = "add";
+            title.value = "";
+            index.value = "";
+        }
+
+        function onUpdate(index) {
+            const checkIfTodoExist = todos[index];
+
+            if (!checkIfTodoExist) {
+                return alert("Todo not found");
+            }
+
+            const todo = todos[index];
+
+            document.querySelector("input[name=title]").value = todo.title;
+            document.querySelector("input[name=index]").value = index;
+            document.querySelector("input[name=type]").value = "update";
+        }
+
+        function updateTodo(index) {
+            const title = document.querySelector("input[name=title]").value;
+
+            const checkIfTodoExist = todos[index];
+
+            if (!checkIfTodoExist) {
+                return alert("Todo not found");
+            }
+            todos[index] = {
+                title,
+            };
+            ''
+            localStorage.setItem("todos", JSON.stringify(todos));
+            listTodo();
+        }
+
+        function deleteTodo(index) {
+            const checkIfTodoExist = todos[index];
+
+            if (!checkIfTodoExist) {
+                return alert("Todo not found");
+            }
+
+            todos.splice(index, 1);
+
+            localStorage.setItem("todos", JSON.stringify(todos));
+            listTodo();
+        }
+
+    </script>
+</body>
+
+</html>
